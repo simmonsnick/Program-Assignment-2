@@ -24,7 +24,7 @@ from sklearn.cluster import KMeans
 import math
 from sklearn.cluster import AgglomerativeClustering
 import pickle
-import utils as u
+
 
 # ----------------------------------------------------------------------
 """
