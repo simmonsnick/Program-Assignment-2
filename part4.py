@@ -14,7 +14,7 @@ from scipy.cluster.hierarchy import dendrogram, linkage  #
 import math
 from sklearn.cluster import AgglomerativeClustering
 import pickle
-import utils as u
+
 
 """
 Part 4.	
