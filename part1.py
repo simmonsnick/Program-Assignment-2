@@ -18,7 +18,6 @@ from sklearn.cluster import AgglomerativeClustering
 import pickle
 
 
-
 # ----------------------------------------------------------------------
 """
 Part 1: 
@@ -29,7 +28,7 @@ In the first task, you will explore how k-Means perform on datasets with diverse
 # Fill this function with code at this location. Do NOT move it. 
 # Change the arguments and return according to 
 # the question asked. 
-
+answers={}
 def load_circle_data():
     data, labels = make_circles(n_samples=100, factor=0.5, noise=0.05, random_state=42)
     return data, labels
@@ -45,9 +44,29 @@ def load_transformed_data():
     data = np.dot(X, transformation)
     return data, y
 
-def fit_kmeans():
-    return None
-
+def fit_kmeans(data, n_clusters):     #fit_means clustering being provide in this dataset 
+        
+   #Extract this dataset and labels ERROR
+    X, y = data
+        
+    #Standardize the dataset
+    scaler = StandardScaler()
+    X = scaler.fit_transform(X)
+    
+    #KMeans for the clustering
+    kmeans = KMeans(n_clusters=n_clusters, init='random', random_state=42)
+    kmeans.fit(X,y)
+    predict_labels=kmeans.predict(X)
+    #predict the labels here
+    # predict_labels = kmeans.labels_
+    
+    # dct value:  the `fit_kmeans` function
+    
+    # dct = answers["1B: fit_kmeans"] = fit_kmeans
+    # dct = fit_kmeans
+    
+    return predict_labels
+dct_1={}
 def compute():
     answers = {}
     """
@@ -59,6 +78,7 @@ def compute():
     
     #5 datasets
     datasets = ['nc', 'nm', 'bvv', 'add', 'b']
+    global dct
     dct = {}
     
     #Load Dataset
@@ -76,12 +96,14 @@ def compute():
         
         #Store data in dct
         dct[dataset] = [data, labels]
-    
+        # dct_1[dataset] = [data, labels]
     # Dictionary of 5 datasets. e.g., dct["nc"] = [data, labels]
     # 'nc', 'nm', 'bvv', 'add', 'b'. keys: 'nc', 'nm', 'bvv', 'add', 'b' (abbreviated datasets)
-    answers["1A: datasets"] = dct
-    #print(answers)
+    dct_1=answers["1A: datasets"] = dct
     
+    # print(answers)
+    return answers["1A: datasets"]
+   
     """
    B. Write a function called fit_kmeans that takes dataset (before any processing on it), i.e., pair of (data, label) Numpy arrays, and the number of clusters as arguments, and returns the predicted labels from k-means clustering. Use the init='random' argument and make sure to standardize the data (see StandardScaler transform), prior to fitting the KMeans estimator. This is the function you will use in the following questions. 
     """
@@ -89,6 +111,7 @@ def fit_kmeans(data, n_clusters):     #fit_means clustering being provide in thi
         
    #Extract this dataset and labels ERROR
     X, y = data
+    # [0]
         
     #Standardize the dataset
     scaler = StandardScaler()
@@ -96,16 +119,17 @@ def fit_kmeans(data, n_clusters):     #fit_means clustering being provide in thi
     
     #KMeans for the clustering
     kmeans = KMeans(n_clusters=n_clusters, init='random', random_state=42)
-    kmeans.fit(X)
-    
+    kmeans.fit(X,y)
+    predict_labels=kmeans.predict(X)
     #predict the labels here
-    predict_labels = kmeans.labels_
+    # predict_labels = kmeans.labels_
     
     # dct value:  the `fit_kmeans` function
-    dct = answers["1B: fit_kmeans"] = fit_kmeans
-    dct = fit_kmeans
     
-    #return predict_labels
+    # dct = answers["1B: fit_kmeans"] = fit_kmeans
+    # dct = fit_kmeans
+    
+    return predict_labels
 
     """"
     C.	Make a big figure (4 rows x 5 columns) of scatter plots (where points are colored by predicted label) with each column corresponding to the datasets generated in part 1.A, and each row being k=[2,3,5,10] different number of clusters. For which datasets does k-means seem to produce correct clusters for (assuming the right number of k is specified) and for which datasets does k-means fail for all values of k? 
@@ -113,50 +137,76 @@ def fit_kmeans(data, n_clusters):     #fit_means clustering being provide in thi
     Create a pdf of the plots and return in your report. 
     """
 def plot_part1C(datasets_dict):
-        
+    
         #Datasets store 
-        #datasets = ['nc', 'nm', 'bvv', 'add', 'b']
+    plot_results={}
+    datasets = ['nc', 'nm', 'bvv', 'add', 'b']
+    for i in datasets:
+        resu=[]
+        dataset_cluster={}
+        for k in [2,3,5,10]:
+            preds=fit_kmeans((datasets_dict[i][0],datasets_dict[i][1]),k)
+            dataset_cluster[k]=preds
+        resu.append((datasets_dict[i][0],datasets_dict[i][1]))
+        resu.append(dataset_cluster)
+        plot_results[i]=resu
         
-        #Figure with 4 rows and 5 columns
-        fig, axes = plt.subplots(nrows=4, ncols=5, figsize=(20, 16))
-        k_values = [2, 3, 5, 10]
+    myplt.plot_part1C(plot_results,'Q1_partc.jpg')
+            
         
-        #Each dataset to column 
-        for i, k in enumerate(k_values):
-            for j, (dataset_name, dataset) in enumerate(datasets_dict.items()):
-                predict_labels = fit_kmeans(dataset, k)
-                if i == 0:
-                    axes[i, j].set_title(dataset)
-                if j == 0:
-                    axes[i, j].set_ylabel(f'k={k}')
+        # Commented Code
+        # #Figure with 4 rows and 5 columns
+        # fig, axes = plt.subplots(nrows=4, ncols=5, figsize=(20, 16))
+        # k_values = [2, 3, 5, 10]
+        
+        # #Each dataset to column 
+        # for i, k in enumerate(k_values):
+        #     #print(datasets_dict.keys())
+        #     #print(len(datasets_dict.values()))
+        #     for j, (dataset_name, dataset) in enumerate(datasets_dict.items()):
                 
-                #Scatter plot with labels and colors
-                axes[i, j].scatter(dataset[:, 0], dataset[:, 1], c=predict_labels, cmap='viridis', s=10)
-                axes[i, j].set_title(f'Dataset {i+1}, k={k}')
-                axes[i, j].set_xlabel("x")
-                axes[i, j].set_ylabel("y")
+        #         # print(dataset)
+        #         # for i in 
+        #         # print(np.array(dataset).shape)
+        #         predict_labels = fit_kmeans(dataset, k)
+        #         #if i == 0:
+        #         #    axes[i, j].set_title(dataset)
+        #         #if j == 0:
+        #         #    axes[i, j].set_ylabel(f'k={k}')
                 
-            plt.tight_layout()
-            plt.show
-            #plt.savefig()
+        #         #Scatter plot with labels and colors
+        #         # print(dataset[0][:,0])
+        #         axes[i, j].scatter(dataset[0][:, 0], dataset[0][:, 1], c=predict_labels, cmap='viridis', s=10)
+        #         axes[i, j].set_title(f'Dataset {i+1}, k={k}')
+        #         axes[i, j].set_xlabel("x")
+        #         axes[i, j].set_ylabel("y")
+        #         # print(predict_labels)
+        #         # myplt.plot_part1C(predict_labels, 'dataset.png')
+        #     plt.tight_layout()
+        #     # plt.savefig('part1C.jpg')
+        #     # plt.show()
+        #     # plt.savefig()
             
     # dct value: return a dictionary of one or more abbreviated dataset names (zero or more elements) 
     # and associated k-values with correct clusters.  key abbreviations: 'nc', 'nm', 'bvv', 'add', 'b'. 
     # The values are the list of k for which there is success. Only return datasets where the list of cluster size k is non-empty.
-        dct = answers["1C: cluster successes"] = {"bvv": [3], "b": [3]} 
+    dct = answers["1C: cluster successes"] = {"bvv": [3], "b": [3]} 
 
-    # dct value: return a list of 0 or more dataset abbreviations (list has zero or more elements, 
-    # which are abbreviated dataset names as strings)
-        dct = answers["1C: cluster failures"] = ["nc", "nm"]
+# dct value: return a list of 0 or more dataset abbreviations (list has zero or more elements, 
+# which are abbreviated dataset names as strings)
+    dct = answers["1C: cluster failures"] = ["nc", "nm"]
+# plot_part1C(dct)
 
-        """
+    datasets = ['nc', 'nm', 'bw', 'add', 'b']
+    k_values = [2, 3]
+# plot_part1C(answers['1A: datasets'])
+    return 'Done'
+
+"""
 D. Repeat 1.C a few times and comment on which (if any) datasets seem to be sensitive to the choice of initialization for the k=2,3 cases. You do not need to add the additional plots to your report.
 
     Create a pdf of the plots and return in your report. 
-    """
-        datasets = ['nc', 'nm', 'bw', 'add', 'b']
-        k_values = [2, 3]
-        
+"""
 def fit_kmeans(data, n_clusters):
     
     X , y = data
@@ -165,29 +215,32 @@ def fit_kmeans(data, n_clusters):
     return kmeans.labels_
     
 def sensitivity_data(datasets, k_values):
-    
+    # print(datasets)
     sensitivity = []
-    for data, X in enumerate(datasets):
+    for data in datasets:
         for k in k_values:
-            labels_initial = fit_kmeans((X), k)
+            # print(X)
+            labels_initial = fit_kmeans(datasets[data], k)
             sensitivity_dataset = []
             
             for y in range(5):
-                labels_new = fit_kmeans((X), k)
+                labels_new = fit_kmeans(datasets[data], k)
                 sensitivity_dataset.append(np.array_equal(labels_initial, labels_new))
                 
-            sensitivity.append((f'Dataset {data+1}, k={k}'))
+            sensitivity.append((f'Dataset {datasets[data]}, k={k}'))
             
     # dct value: list of dataset abbreviations
     # Look at your plots, and return your answers.
     # The plot is part of your report, a pdf file name "report.pdf", in your repository.
             dct = answers["1D: datasets sensitive to initialization"] = [""]
-            return answers
-
+            # return answers
+    return sensitivity_data
 
 # ----------------------------------------------------------------------
 if __name__ == "__main__":
     answers = compute()
-
+    plot_part1C(answers)
+    # sensitivity_data(answers,[2])
+    #print("Successful have the K results")
     with open("part1.pkl", "wb") as f:
         pickle.dump(answers, f)
