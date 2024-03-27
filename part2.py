@@ -4,6 +4,7 @@ from pprint import pprint
 import math
 from sklearn.cluster import AgglomerativeClustering
 import pickle
+import utils as u
 
 import myplots as myplt
 import time
@@ -36,32 +37,79 @@ In this task you will explore different methods to find a good value for k
 # Change the arguments and return according to 
 # the question asked. 
 
-def fit_kmeans():
-    return None
-
-def compute():
-    # ---------------------
-    answers = {}
-
-    """
-    A.	Call the make_blobs function with following parameters :(center_box=(-20,20), n_samples=20, centers=5, random_state=12).
-    """
-    data_blob = make_blobs(center_box=(-20, 20), n_samples=20, centers=5, random_state=12)
-
-    # dct: return value from the make_blobs function in sklearn, expressed as a list of three numpy arrays
-    dct = {}
+def fit_kmeans(X, y, kmeans):
     
-    dct = answers["2A: blob"] = [np.zeros(0)]
-
-    """
-    B. Modify the fit_kmeans function to return the SSE (see Equations 8.1 and 8.2 in the book).
-    """
-def fit_kmeans(data, n_clusters):
-    X, y = data
+    X, y, kmeans = data
     
     #Scaling the dataset
     scaler = StandardScaler()
     X = scaler.fit_transform(X)
+    
+    for i in range(kmeans, n_clusters):
+    #KMeans for clustering
+        kmeans = KMeans(n_clusters=n_clusters, init='random', random_state=42)
+        kmeans.fit(X)
+    
+    #Predict kmean labels
+    predict_labels = kmeans.labels_
+    
+    #SSE calcuations 
+    SSE = kmeans.inertia_
+def sse_inertia(data, n_clusters):
+    kmeans = KMeans(n_clusters=n_clusters)
+    kmeans.fit(data)
+    centroids = kmeans.cluster_centers_
+    labels = kmeans.labels_
+    
+    SSE = 0
+    
+    for i in range(kmeans, n_clusters):
+        cluster_points = data[labels == i]
+        
+        distances = np.linalg.norm(cluster_points - centroids[i], axis=1)**2
+        
+        sse += np.sum(distances)
+        
+        return SSE
+    
+    
+    
+    return None
+
+    """
+    A.	Call the make_blobs function with following parameters :(center_box=(-20,20), n_samples=20, centers=5, random_state=12).
+    """
+def compute():
+    
+    answers = {}
+    
+    # Call the make_blobs function with the specified parameters
+    data_blob, labels_blob = make_blobs(center_box=(-20, 20), n_samples=20, centers=5, random_state=12)
+    
+    # Determine the number of columns in data_blob
+    num_columns = data_blob.shape[1]
+    
+    # Extract all columns from data_blob
+    #figure = [data_blob[:, i], for i in range(num_columns)]
+    
+    # Store the extracted features in the answers dictionary
+    #answers["2A: blob"] = figure
+    
+    dct = [data_blob[0:,0], data_blob[0:,1], labels_blob]
+    #print(dct)
+    answers['2A: blob'] = dct
+    #print(answers["2A: blob"])
+    return answers["2A: blob"]
+    
+    """
+    B. Modify the fit_kmeans function to return the SSE (see Equations 8.1 and 8.2 in the book).
+    """
+    def fit_kmeans(data, n_clusters):
+        X, y = data
+    
+    #Scaling the dataset
+    scaler = StandardScaler()
+    scaled_data = scaler.fit_transform(data)
     
     #KMeans for clustering
     kmeans = KMeans(n_clusters=n_clusters, init='random', random_state=42)
@@ -72,15 +120,39 @@ def fit_kmeans(data, n_clusters):
     
     #SSE calcuations 
     SSE = kmeans.inertia_
+def sse_inertia(data1,data2,label, n_clusters):
+    # print(data)
+    # print(data, label)
+    kmeans = KMeans(n_clusters=n_clusters)
+    # print(data[0][0:])
+    concatenated_data = np.concatenate([data1.reshape(-1, 1), data2.reshape(-1, 1)], axis=1)
+    kmeans.fit(concatenated_data)
+    centroids = kmeans.cluster_centers_
+    labels = kmeans.labels_
+    print(labels)
     
-    # dct value: the `fit_kmeans` function
-    answers = {}
-    dct = answers["2B: fit_kmeans"] = fit_kmeans
-    return predict_labels, SSE
+    # SSE = 0
+    
+    # for i in range(kmeans, n_clusters):
+    #     cluster_points = data[labels == i]
+        
+    #     distances = np.linalg.norm(cluster_points - centroids[i], axis=1)**2
+        
+    #     sse += np.sum(distances)
+        
+    #     return SSE
+    # print('here')
+    # # dct value: the `fit_kmeans` function
+    # answers = {}
+    # dct = answers["2B: fit_kmeans"] = fit_kmeans
+    # #return answers
+    # print(answers)
+
     """
     C.	Plot the SSE as a function of k for k=1,2,….,8, and choose the optimal k based on the elbow method.
     """
 def compute_sse(data, k_values):
+    sse_plot_data = []
     SSE_values = []
     for k in k_values:
         SSE = fit_kmeans(data, k)
@@ -129,6 +201,7 @@ def compute_inertia(data, k_values):
     plt.title('Optimal k on Inertia')
     plt.grid(True)
     plt.show()
+   
     
     optimal_k_inertia = np.argmin(inertia_values) + 1
     
@@ -146,6 +219,14 @@ def compute_inertia(data, k_values):
 # ----------------------------------------------------------------------
 if __name__ == "__main__":
     answers = compute()
-
+    print(answers)
+    # print(answers[1])
+    # data_t],axis=1)
+    # print(answers[0])
+    print(sse_inertia(answers[0],answers[1],answers[2],2))
+    # print(compute()
+    # compute_sse = (answers)
+    # compute_inertia = (answers)
+    # print(compute_inertia)
     with open("part2.pkl", "wb") as f:
         pickle.dump(answers, f)
